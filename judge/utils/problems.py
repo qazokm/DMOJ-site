@@ -29,7 +29,7 @@ def contest_completed_ids(participation):
     if result is None:
         result = set(participation.submissions.filter(submission__result='AC', points=F('problem__points'))
                      .values_list('problem__problem__id', flat=True).distinct())
-        cache.set(key, result, 86400)
+        cache.set(key, result, 1)
     return result
 
 
@@ -39,7 +39,7 @@ def user_completed_ids(profile):
     if result is None:
         result = set(Submission.objects.filter(user=profile, result='AC', points=F('problem__points'))
                      .values_list('problem_id', flat=True).distinct())
-        cache.set(key, result, 86400)
+        cache.set(key, result, 1)
     return result
 
 
@@ -52,7 +52,7 @@ def contest_attempted_ids(participation):
                                                  .values_list('problem__problem__id', 'problem__points')
                                                  .annotate(points=Max('points'))
                                                  .filter(points__lt=F('problem__points')))}
-        cache.set(key, result, 86400)
+        cache.set(key, result, 1)
     return result
 
 
@@ -65,7 +65,7 @@ def user_attempted_ids(profile):
                                                  .values_list('problem__id', 'problem__points')
                                                  .annotate(points=Max('points'))
                                                  .filter(points__lt=F('problem__points')))}
-        cache.set(key, result, 86400)
+        cache.set(key, result, 1)
     return result
 
 

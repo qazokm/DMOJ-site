@@ -14,6 +14,11 @@ from judge.models import Language, Profile, Problem, ProblemGroup, ProblemType, 
     MiscConfig, Judge, NavigationBar, Contest, ContestParticipation, Organization, BlogPost, \
     License, OrganizationRequest, ContestTag, Ticket
 
+# MOD
+from judge.admin.user import MyUserAdmin
+from django.contrib.auth.models import User
+# ENDMOD
+
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Profile, ProfileAdmin)
@@ -32,3 +37,8 @@ admin.site.register(BlogPost, BlogPostAdmin)
 admin.site.register(License, LicenseAdmin)
 admin.site.register(OrganizationRequest, OrganizationRequestAdmin)
 admin.site.register(Ticket, TicketAdmin)
+
+# MOD
+admin.site.unregister(User)
+admin.site.register(User, MyUserAdmin)
+# ENDMOD

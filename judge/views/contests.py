@@ -437,38 +437,14 @@ def best_solution_state(points, total):
         return 'full-score'
     return 'partial-score'
 
-
 def base_contest_ranking_list(contest, problems, queryset, for_user=None):
-    cursor = connection.cursor()
-    cursor.execute('''
-        SELECT part.id, cp.id, prob.code, MAX(cs.points) AS best, MAX(sub.date) AS `last`
-        FROM judge_contestproblem cp CROSS JOIN judge_contestparticipation part INNER JOIN
-             judge_problem prob ON (cp.problem_id = prob.id) LEFT OUTER JOIN
-             judge_contestsubmission cs ON (cs.problem_id = cp.id AND cs.participation_id = part.id) LEFT OUTER JOIN
-             judge_submission sub ON (sub.id = cs.submission_id)
-        WHERE cp.contest_id = %s AND part.contest_id = %s {extra}
-        GROUP BY cp.id, part.id
-    '''.format(extra=('AND part.user_id = %s' if for_user is not None else
-                                         'AND part.virtual = 0')),
-                   (contest.id, contest.id) + ((for_user,) if for_user is not None else ()))
-    data = {(part, prob): (code, best, last and from_database_time(last)) for part, prob, code, best, last in cursor}
-    cursor.close()
-
-    problems = map(attrgetter('id', 'points', 'is_pretested'), problems)
+    problems = list(contest.contest_problems.select_related('problem').defer('problem__description').order_by('order'))
 
     def make_ranking_profile(participation):
-        part = participation.id
-        return make_contest_ranking_profile(participation, [
-            BestSolutionData(code=data[part, prob][0], points=data[part, prob][1],
-                             time=data[part, prob][2] - participation.start,
-                             state=best_solution_state(data[part, prob][1], points),
-                             is_pretested=is_pretested)
-            if (part, prob) in data and data[part, prob][1] is not None else None
-            for prob, points, is_pretested in problems])
+        return get_participation_ranking_profile(contest, participation, problems)
 
     return map(make_ranking_profile, queryset.select_related('user__user', 'rating')
                .defer('user__about', 'user__organizations__about'))
-
 
 def contest_ranking_list(contest, problems):
     return base_contest_ranking_list(contest, problems, contest.users.filter(virtual=0)
