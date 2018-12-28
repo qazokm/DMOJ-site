@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('judge', '0068_hide_scoreboard'),
+        ('judge', '0069_unique_solution_patch'),
     ]
 
     operations = [

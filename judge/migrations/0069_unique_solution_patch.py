@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('judge', '0064_unique_solution'),
+        ('judge', '0068_hide_scoreboard'),
     ]
 
     operations = [
